@@ -27,6 +27,7 @@ import org.apache.kafka.clients.admin.ListClusterLinksOptions;
 import org.apache.kafka.clients.admin.ListMirrorsOptions;
 import org.apache.kafka.clients.admin.MirrorTopicDescription;
 import org.apache.kafka.clients.admin.NewClusterLink;
+import org.apache.kafka.clients.admin.NewMirrorTopic;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.errors.ClusterAuthorizationException;
@@ -51,8 +52,6 @@ public class kli {
         Properties properties = loadProperties("kafka-config.properties");
         // Load the Link configuration to be used by the link
         Properties linkConfigProps = loadProperties("link-config.properties");
-        // The Link name
-        String linkName = "TEST";
 
         // Create config map from properties
         Map<String, String> configs = new HashMap<>();
@@ -60,15 +59,37 @@ public class kli {
           configs.put(entry.getKey().toString(), entry.getValue().toString());
         }
 
+        // The Link name
+        String linkName = "TEST";
+        // Create Link object
         NewClusterLink newClusterLink = new NewClusterLink(linkName, null, configs);
+        // The topic name 
+        String topic = "test";
+        short replicationFactor = 1;
 
+        NewTopic newTopic = new NewTopic(topic, Optional.empty(), Optional.of(replicationFactor));
+        newTopic.mirror(Optional.of(new NewMirrorTopic(linkName, topic)));
 
-
+    
         try (ConfluentAdmin adminClient = ConfluentAdmin.create(properties)) {
             CreateClusterLinksOptions options = new CreateClusterLinksOptions();
             adminClient.createClusterLinks(Collections.singleton(newClusterLink), options).all().get();
             logger.info("Successfully created new cluster link {}", linkName);
-        } catch (Exception e) {
+            
+
+        }catch (Exception e) {
+            if (e.getCause() instanceof ClusterLinkExistsException) {
+                logger.warn("Cluster link {} already exists. Skipping creation.", linkName);
+            } else {
+                e.printStackTrace();
+            }
+        }
+
+        try (ConfluentAdmin adminClient = ConfluentAdmin.create(properties)) {
+            logger.info("Creating mirror topic {} on link {}", topic, linkName);
+            adminClient.createTopics(Collections.singleton(newTopic)).all().get();
+            logger.info("Successfully created new mirror topic {}", topic);
+        }catch (Exception e) {
             e.printStackTrace();
         }
     }
