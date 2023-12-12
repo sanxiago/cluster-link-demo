@@ -1,3 +1,9 @@
+Some Examples using ConfluentAdmin and Cluster Link
+Examples:
+1. Create a link called TEST
+2. Create a mirror of source topic test called test
+
+
 # Clone it
 ```
 git clone https://github.com/sanxiago/cluster-link-demo
