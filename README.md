@@ -42,7 +42,12 @@ confluent-7.5.2/bin/zookeeper-server-start confluent-7.5.2/etc/kafka/zookeeper.p
 # start kafka
 confluent-7.5.2/bin/kafka-server-start confluent-7.5.2/etc/kafka/server.properties > /tmp/kafka.log &
 ```
-# run create link from jar
+# Run create link from jar
 ```
 java  -cp target/kli-1.0-SNAPSHOT-jar-with-dependencies.jar com.sanxiago.kli
+```
+
+# Check if it created the link
+```
+confluent-7.5.2/bin/kafka-cluster-links --bootstrap-server localhost:9092 --command-config kafka-config.properties --describe
 ```
