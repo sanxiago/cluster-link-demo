@@ -20,7 +20,7 @@ EOF
 ```
 # Create the link config file used by the link
 ```
-cat <<EOF> kafka-config.properties
+cat <<EOF> link-config.properties
 ssl.endpoint.identification.algorithm=https
 sasl.mechanism=PLAIN
 request.timeout.ms=20000
